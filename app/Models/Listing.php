@@ -1,28 +1,29 @@
 <?php
+
 namespace App\Models;
 
-class Listing{
-    public static function all(){
-        return [
-            [
-                'id' => 1,
-                'title'=>'Title one',
-                'description'=>'Description one'
-            ],
-            [
-                'id' => 2,
-                'title'=>'Title two',
-                'description'=>'Description two'
-            ]
-            ];
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Listing extends Model
+{
+    use HasFactory;
+
+    protected $fillable = ['title','logo','company', 'location', 'website','email','description','tags' ,'user_id'];
+
+    public function scopeFilter($query, array $filters){
+        if( $filters['tag'] ?? false){
+            $query->where('tags', 'like', '%'. $filters['tag'] . '%');
+        }
+        if( $filters['search'] ?? false){
+            $query->where('title', 'like', '%'. $filters['search'] . '%')
+            ->orWhere('description', 'like', '%'. $filters['search'] . '%')
+            ->orWhere('tags', 'like', '%'. $filters['search'] . '%');
+        }
     }
 
-    public static function find($id){
-        $listings = self::all();
-        foreach ($listings as $listing) {
-            if($listing['id'] == $id){
-                return $listing;
-            }
-        }
+    //relationship to user
+    public function user(){
+        return $this->belongsTo(User::class, 'user_id');
     }
 }
